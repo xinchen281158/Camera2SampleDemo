@@ -19,7 +19,7 @@ import com.tencent.xlab.infinixcamera2.R;
  */
 
 public class ASeekBar extends LinearLayout implements SeekBar.OnSeekBarChangeListener {
-    private int mStallCount = 4;//档位数量
+    private int mStallCount = 13;//档位数量
     private SeekBar mSeekBar;
     private TextView StallName;//档位名称
     private String mStallName;
@@ -69,17 +69,17 @@ public class ASeekBar extends LinearLayout implements SeekBar.OnSeekBarChangeLis
         StallName.setTextColor(mTextColor);
         StallName.setText(TextUtils.isEmpty(mStallName) ? "" : mStallName);
         mSeekBar.setOnSeekBarChangeListener(this);
-        if (mStallCount > 5) mStallCount = 5;
+        if (mStallCount > 13) mStallCount = 13;
 
         //根据档位数量来选择显示几个档位(范围是最小3个档，最大5个档)
         if (mStallCount <= 3) {//档位小于三，也就是最小情况
             findViewById(R.id.tv_stall_num2).setVisibility(GONE);
             findViewById(R.id.tv_stall_num3).setVisibility(GONE);
-        } else if (mStallCount == 4) {
-            findViewById(R.id.tv_stall_num3).setVisibility(GONE);
+        } else if (mStallCount == 13) {
+            findViewById(R.id.tv_stall_num11).setVisibility(GONE);
         }
         //最后一个档位
-        mStallLast = (TextView) findViewById(R.id.tv_stall_num_last);
+        mStallLast = (TextView) findViewById(R.id.tv_stall_num12);
         mStallLast.setText(mStallCount - 1 + "");
 
     }

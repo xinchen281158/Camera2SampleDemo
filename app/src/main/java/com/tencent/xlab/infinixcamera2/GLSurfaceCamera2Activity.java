@@ -283,29 +283,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             allocationRgb.copyTo(bitmap);
 
             // Release
-
-//            long time = System.currentTimeMillis();
-//            if (mCameraProxy.isFrontCamera()) {
-////                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-//                Log.d(TAG, "BitmapFactory.decodeByteArray time: " + (System.currentTimeMillis() - time));
-//                time = System.currentTimeMillis();
-//                // 前置摄像头需要左右镜像
-//                Bitmap rotateBitmap = ImageUtils.rotateBitmap(bitmap, 270, true, true);
-//                Log.d(TAG, "rotateBitmap time: " + (System.currentTimeMillis() - time));
-//                time = System.currentTimeMillis();
-//                ImageUtils.saveBitmap(rotateBitmap);
-//                Log.d(TAG, "saveBitmap time: " + (System.currentTimeMillis() - time));
-//                rotateBitmap.recycle();
-//            } else {
-////                ImageUtils.saveImage(bytes);
-////                Matrix m = new Matrix();
-////                m.postScale(-1, 1); // 镜像水平翻转
-//                Bitmap rotateBitmap = ImageUtils.rotateBitmap(bitmap, 90, true, true);
-////                Bitmap rotateBitmap = Bitmap.createBitmap(bitmap,0, 0, matrixBitmap.getWidth(), matrixBitmap.getHeight(), m, true);
-//                ImageUtils.saveBitmap(rotateBitmap);
-//                Log.d(TAG, "saveBitmap time: " + (System.currentTimeMillis() - time));
-//                rotateBitmap.recycle();
-//            }
             ImageUtils.saveBitmap(bitmap);
             images[0].close();
             bitmap.recycle();

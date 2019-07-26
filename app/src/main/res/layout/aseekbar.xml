@@ -40,36 +40,83 @@
                 style="@style/textTheme"
                 android:layout_weight="0.5"
                 android:gravity="left"
-                android:text="0" />
+                android:text="100" />
 
             <TextView
                 android:id="@+id/tv_stall_num1"
                 style="@style/textTheme"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="1" />
+                android:text="125" />
 
             <TextView
                 android:id="@+id/tv_stall_num2"
                 style="@style/textTheme"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="2" />
+                android:text="160" />
 
             <TextView
                 android:id="@+id/tv_stall_num3"
                 style="@style/textTheme"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="3" />
+                android:text="200" />
 
             <TextView
                 android:id="@+id/tv_stall_num_last"
                 style="@style/textTheme"
                 android:layout_weight="0.5"
                 android:gravity="right"
-                android:text="4" />
-
+                android:text="250" />
+            <TextView
+                android:id="@+id/tv_stall_num5"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="320" />
+            <TextView
+                android:id="@+id/tv_stall_num6"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="400" />
+            <TextView
+                android:id="@+id/tv_stall_num7"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="500" />
+            <TextView
+                android:id="@+id/tv_stall_num8"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="640" />
+            <TextView
+                android:id="@+id/tv_stall_num9"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="800" />
+            <TextView
+                android:id="@+id/tv_stall_num10"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="1000" />
+            <TextView
+                android:id="@+id/tv_stall_num11"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="1250" />
+            <TextView
+                android:id="@+id/tv_stall_num12"
+                style="@style/textTheme"
+                android:layout_weight="0.5"
+                android:gravity="right"
+                android:text="1600" />
         </LinearLayout>
 
         <SeekBar

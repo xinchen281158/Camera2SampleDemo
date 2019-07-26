@@ -117,7 +117,7 @@ public class Camera2Proxy {
             mCameraCharacteristics = mCameraManager.getCameraCharacteristics(Integer.toString(mCameraId));
             isoRange = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
             expTimeRange = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
-            if (isoRange!=null&&expTimeRange!=null){
+            if (isoRange != null && expTimeRange != null) {
                 mIso = isoRange.getLower();
                 mExpTime = expTimeRange.getLower();
             }
@@ -130,9 +130,11 @@ public class Camera2Proxy {
                     CompareSizesByArea());
             Log.d(TAG, "picture size: " + largest.getWidth() + "*" + largest.getHeight());
 //            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.JPEG, 2);
+//            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 4);
             mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 4);
             // 预览大小，根据上面选择的拍照图片的长宽比，选择一个和控件长宽差不多的大小
             mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height, largest);
+//            mPreviewSize = map.getOutputSizes(SurfaceTexture.class)[0];
             Log.d(TAG, "preview size: " + mPreviewSize.getWidth() + "*" + mPreviewSize.getHeight());
             // 打开摄像头
             mCameraManager.openCamera(Integer.toString(mCameraId), mStateCallback, mBackgroundHandler);
@@ -391,12 +393,12 @@ public class Camera2Proxy {
         if (isoRange != null) {
             int max1 = isoRange.getUpper();
             int min1 = isoRange.getLower();
-            final int iso = ((progress * (max1 - min1)) / 100 + min1);
+            final int iso = ((progress * (max1 - min1)) / 13 + min1);
             mIso = iso;
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
 //        //设置每秒30帧
-//        Range<Integer> fps[] = mCameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-//        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps[fps.length - 1]);
+            Range<Integer> fps[] = mCameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps[fps.length - 1]);
             mPreviewRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, mIso);
             mPreviewRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, mExpTime);
             mPreviewRequest = mPreviewRequestBuilder.build();
@@ -407,7 +409,7 @@ public class Camera2Proxy {
                     GLSurfaceCamera2Activity.tv_iso.setText("iso:" + mIso + "\n曝光：" + mExpTime / 1000000 + "ms");
                 }
             });
-        }else {
+        } else {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
