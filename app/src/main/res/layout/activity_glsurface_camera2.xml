@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.tencent.xlab.infinixcamera2.view.Camera2GLSurfaceView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"/>
+
+    </FrameLayout>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:actionBarSize"
+        android:background="@color/colorPrimary"
+        app:contentInsetStart="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/toolbar_close_iv"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_vertical"
+                android:padding="10dp"
+                android:src="@mipmap/ic_close"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <ImageView
+                android:id="@+id/toolbar_switch_iv"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_vertical"
+                android:padding="10dp"
+                android:src="@mipmap/ic_camera_switch"/>
+            <ImageView
+                android:id="@+id/toolbar_flash_iv"
+                android:src="@mipmap/ic_flash_off"
+                android:layout_width="44dp"
+                android:layout_height="40dp" />
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/take_picture_iv"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/click_button_selector"/>
+
+    <ImageView
+        android:id="@+id/picture_iv"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"
+        android:scaleType="centerCrop"/>
+    <!--<LinearLayout-->
+        <!--android:id="@+id/iso_ll"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="5dp"-->
+        <!--android:layout_below="@id/toolbar"-->
+        <!--android:orientation="horizontal">-->
+        <!--<TextView-->
+            <!--android:id="@+id/tx"-->
+            <!--android:layout_toStartOf="@id/seekbar"-->
+            <!--android:text="iso设置"-->
+            <!--android:textColor="@color/red"-->
+            <!--android:layout_below="@id/toolbar"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<SeekBar-->
+            <!--android:id="@+id/seekbar"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!---->
+    <!--</LinearLayout>-->
+    <com.tencent.xlab.infinixcamera2.view.ASeekBar
+        android:id="@+id/iso_seekBar"
+        android:layout_below="@id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:seekbar_thump="@mipmap/zanting"
+        app:default_stall="2"
+        app:stall_count="5"
+        app:stall_name="iso设置"
+        app:text_color="@color/colorAccent"/>
+    <com.tencent.xlab.infinixcamera2.view.ASeekBar
+        android:id="@+id/exp_seekBar"
+        android:layout_below="@id/iso_seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:seekbar_thump="@mipmap/zanting"
+        app:default_stall="2"
+        app:stall_count="5"
+        app:stall_name="曝光设置"
+        app:text_color="@color/colorAccent"/>
+    <!--<LinearLayout-->
+        <!--android:id="@+id/exp_ll"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@id/iso_ll"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:orientation="horizontal">-->
+        <!--<TextView-->
+            <!--android:layout_toStartOf="@id/seekbar"-->
+            <!--android:text="曝光设置"-->
+            <!--android:textColor="@color/red"-->
+            <!--android:layout_below="@id/toolbar"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<SeekBar-->
+            <!--android:id="@+id/seekbar_exp"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content" />-->
+    <!--</LinearLayout>-->
+    <TextView
+        android:id="@+id/tv_iso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/red"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/exp_seekBar"/>
+    <EditText
+        android:id="@+id/et_count"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_margin="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" />
+</RelativeLayout>
