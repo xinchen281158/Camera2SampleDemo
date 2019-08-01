@@ -4,7 +4,8 @@ ISO、快门（曝光时间）、摄像头切换、闪光灯控制、
 
 连拍（左下角输入框输入连拍次数，点击拍照按钮后可进行连拍），因为保存了YUV格式数据所以会有卡顿
 
-![](C:\Users\v_ccxinchen\AppData\Local\Microsoft\Windows\INetCache\IE\0GGVL6BK\Screenshot_20190726-110823[1].png)
+<img width="320" height="640" src="https://github.com/xinchen281158/Camera2SampleDemo/blob/master/Screenshot.png"/>
+
 
 #### Camera2Proxy : 为控制 Camera2 相关参数的工具类
 
