@@ -47,6 +47,7 @@ public class Camera2Proxy {
     private Activity mActivity;
 
     private int mCameraId = CameraCharacteristics.LENS_FACING_FRONT; // 要打开的摄像头ID
+//    private int mCameraId = CameraCharacteristics.LENS_FACING_EXTERNAL; // 要打开的摄像头ID
     private Size mPreviewSize; // 预览大小
     private CameraManager mCameraManager; // 相机管理者
     private CameraCharacteristics mCameraCharacteristics; // 相机属性
@@ -131,13 +132,14 @@ public class Camera2Proxy {
             Log.d(TAG, "picture size: " + largest.getWidth() + "*" + largest.getHeight());
 //            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.JPEG, 2);
 //            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 4);
-            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 4);
+            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 2);
             // 预览大小，根据上面选择的拍照图片的长宽比，选择一个和控件长宽差不多的大小
-            mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height, largest);
-//            mPreviewSize = map.getOutputSizes(SurfaceTexture.class)[0];
+//            mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height, largest);
+            mPreviewSize = map.getOutputSizes(SurfaceTexture.class)[0];
             Log.d(TAG, "preview size: " + mPreviewSize.getWidth() + "*" + mPreviewSize.getHeight());
             // 打开摄像头
             mCameraManager.openCamera(Integer.toString(mCameraId), mStateCallback, mBackgroundHandler);
+            Log.d(TAG, "Camera id" + mCameraId);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -166,7 +168,9 @@ public class Camera2Proxy {
             Log.w(TAG, "setImageAvailableListener: mImageReader is null");
             return;
         }
+
         mImageReader.setOnImageAvailableListener(onImageAvailableListener, null);
+
     }
 
     public void setPreviewSurface(SurfaceHolder holder) {
@@ -186,28 +190,29 @@ public class Camera2Proxy {
             }
             mPreviewRequestBuilder.addTarget(mPreviewSurface); // 设置预览输出的 Surface
             mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface, mImageReader.getSurface()),
-                    new CameraCaptureSession.StateCallback() {
+                        new CameraCaptureSession.StateCallback() {
 
-                        @Override
-                        public void onConfigured(@NonNull CameraCaptureSession session) {
-                            mCaptureSession = session;
-                            // 设置连续自动对焦
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest
-                                    .CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                            // 设置自动曝光
+                            @Override
+                            public void onConfigured(@NonNull CameraCaptureSession session) {
+                                mCaptureSession = session;
+                                // 设置连续自动对焦
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest
+                                        .CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                                // 设置自动曝光
 //                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest
 //                                    .CONTROL_AE_MODE_ON_AUTO_FLASH);
 
-                            // 设置完后自动开始预览
-                            mPreviewRequest = mPreviewRequestBuilder.build();
-                            startPreview();
-                        }
+                                // 设置完后自动开始预览
+                                mPreviewRequest = mPreviewRequestBuilder.build();
+                                startPreview();
+                            }
 
-                        @Override
-                        public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-                            Log.e(TAG, "ConfigureFailed. session: mCaptureSession");
-                        }
-                    }, mBackgroundHandler); // handle 传入 null 表示使用当前线程的 Looper
+                            @Override
+                            public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                                Log.e(TAG, "ConfigureFailed. session: mCaptureSession");
+                            }
+                        }, mBackgroundHandler);
+
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -247,6 +252,7 @@ public class Camera2Proxy {
                     .TEMPLATE_STILL_CAPTURE);
 
             captureBuilder.addTarget(mImageReader.getSurface());
+
             captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation(mDeviceOrientation));
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
@@ -293,7 +299,9 @@ public class Camera2Proxy {
         try {
             CaptureRequest.Builder captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice
                     .TEMPLATE_STILL_CAPTURE);
+
             captureBuilder.addTarget(mImageReader.getSurface());
+
             captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation(mDeviceOrientation));
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
@@ -389,11 +397,17 @@ public class Camera2Proxy {
         startPreview();
     }
 
-    public void setIsoChange(int progress) {
+    public void setIsoChange(int iso) {
         if (isoRange != null) {
             int max1 = isoRange.getUpper();
             int min1 = isoRange.getLower();
-            final int iso = ((progress * (max1 - min1)) / 13 + min1);
+//            if (iso > max1){
+//                mIso = max1;
+//            }else if (iso < min1){
+//                mIso = min1;
+//            }else {
+//                mIso = iso;
+//            }
             mIso = iso;
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
 //        //设置每秒30帧
@@ -406,7 +420,8 @@ public class Camera2Proxy {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    GLSurfaceCamera2Activity.tv_iso.setText("iso:" + mIso + "\n曝光：" + mExpTime / 1000000 + "ms");
+                    GLSurfaceCamera2Activity.tv_iso.setText(String.valueOf(mIso));
+                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf (mExpTime/1000));
                 }
             });
         } else {
@@ -419,12 +434,17 @@ public class Camera2Proxy {
         }
     }
 
-    public void setExpChange(int progress) {
+    public void setExpChange(long expTime) {
         if (expTimeRange != null) {
-            long max3 = expTimeRange.getUpper() / 4;
+            long max3 = expTimeRange.getUpper() ;
             long min3 = expTimeRange.getLower();
-            long expTime = ((progress * (max3 - min3)) / 100 + min3);
-            mExpTime = expTime;
+            if (expTime > max3){
+                mExpTime = max3;
+            }else if (expTime < min3){
+                mExpTime = min3;
+            }else {
+                mExpTime = expTime;
+            }
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
             mPreviewRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, mIso);
             mPreviewRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, mExpTime);
@@ -435,7 +455,9 @@ public class Camera2Proxy {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    GLSurfaceCamera2Activity.tv_iso.setText("iso:" + mIso + "\n曝光：" + mExpTime / 1000000 + "ms");
+//                    GLSurfaceCamera2Activity.tv_iso.setText("iso:" + mIso + "\n曝光：" + mExpTime/1000 + "us");
+                    GLSurfaceCamera2Activity.tv_iso.setText(String.valueOf(mIso));
+                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf (mExpTime/1000));
                 }
             });
         } else {

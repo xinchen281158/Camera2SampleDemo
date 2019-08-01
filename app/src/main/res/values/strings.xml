@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">InfinixCamera2</string>
+    <string name="setIso">设置ISO</string>
+    <string name="setExpTime">设置曝光</string>
+    <string name="saveRAW">RAW</string>
+    <string name="saveYUV">YUV</string>
 </resources>

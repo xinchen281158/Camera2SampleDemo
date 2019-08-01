@@ -50,6 +50,30 @@ public class ImageUtils {
         return rotateBitmap;
     }
 
+    public static void saveYUVImage(byte[] jpeg) {
+        String fileName = DATE_FORMAT.format(new Date(System.currentTimeMillis())) + ".yuv";
+        File outFile = new File(GALLERY_PATH, fileName);
+        Log.d(TAG, "saveImage. filepath: " + outFile.getAbsolutePath());
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(outFile);
+            os.write(jpeg);
+            os.flush();
+            os.close();
+            insertToDB(outFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public static void saveImage(byte[] jpeg) {
         String fileName = DATE_FORMAT.format(new Date(System.currentTimeMillis())) + ".jpg";
         File outFile = new File(GALLERY_PATH, fileName);

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.DngCreator;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.AsyncTask;
@@ -15,21 +16,28 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.lxj.xpopup.XPopup;
 import com.tencent.xlab.infinixcamera2.camera.Camera2Proxy;
+import com.tencent.xlab.infinixcamera2.utils.ImageUtil;
 import com.tencent.xlab.infinixcamera2.utils.ImageUtils;
-import com.tencent.xlab.infinixcamera2.view.ASeekBar;
 import com.tencent.xlab.infinixcamera2.view.Camera2GLSurfaceView;
+import com.tencent.xlab.infinixcamera2.view.ExpListDrawerPopupView;
+import com.tencent.xlab.infinixcamera2.view.ListDrawerPopupView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,9 +52,15 @@ import java.util.regex.Pattern;
 import static com.tencent.xlab.infinixcamera2.utils.ImageUtils.GALLERY_PATH;
 
 
-public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.OnClickListener {
+public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
 
     private static final String TAG = "GLSurfaceCamera2Act";
+
+    private static final int CHOSE_PHOTO = 1;
+
+    public static boolean saveYUV = false;
+    public boolean saveRAW = true;
+
 
     private ImageView mCloseIv;
     private ImageView mSwitchCameraIv;
@@ -54,15 +68,20 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
     private ImageView mPictureIv;
     private ImageView mSetFlashIv;
 
-    private ASeekBar iso_aSeekBar;
-    private ASeekBar exp_aSeekBar;
     private EditText et_count;
     public static TextView tv_iso;
+    public static TextView tv_exp;
+    private Button btn_iso;
+    private Button btn_expTime;
+
+    private RadioGroup rg_DataStyle;
 
     private Camera2GLSurfaceView mCameraView;
 
     private Camera2Proxy mCameraProxy;
     private int flashState = 1;
+
+    private ImageUtil imageUtil = new ImageUtil(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,33 +115,53 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
         mSetFlashIv.setOnClickListener(this);
         mPictureIv.setImageBitmap(ImageUtils.getLatestThumbBitmap());
         mCameraView = findViewById(R.id.camera_view);
-        iso_aSeekBar = findViewById(R.id.iso_seekBar);
-        exp_aSeekBar = findViewById(R.id.exp_seekBar);
 
         et_count = findViewById(R.id.et_count);
         tv_iso = findViewById(R.id.tv_iso);
-
+        tv_exp = findViewById(R.id.tv_exp);
         mCameraProxy = mCameraView.getCameraProxy();
 
-        iso_aSeekBar.setOnASeekBarListener(new IsoSeekBarListener());
-        exp_aSeekBar.setOnASeekBarListener(new ExpTimeSeekBarListener());
+        btn_iso = findViewById(R.id.btn_iso);
+        btn_iso.setOnClickListener(this);
+        btn_expTime = findViewById(R.id.btn_expTime);
+        btn_expTime.setOnClickListener(this);
+
+        rg_DataStyle = findViewById(R.id.rg_DataStyle);
+        rg_DataStyle.setOnCheckedChangeListener(this);
     }
 
-    private class ExpTimeSeekBarListener implements ASeekBar.ASeekBarListener{
-
-        @Override
-        public void SeekBarChange(int stall) {
-            mCameraProxy.setExpChange(stall);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK){
+            if (requestCode == CHOSE_PHOTO){
+                String selectPath = imageUtil.handleImagePathOnKitKat(this, data);
+                if (selectPath != null) {
+                    Intent intent = new Intent(this, PhototActivity.class);
+                    intent.putExtra("path", selectPath);
+                    startActivity(intent);
+                } else {
+                    Log.e(TAG, "image not loaded...");
+                }
+            }
         }
     }
 
-    private class IsoSeekBarListener implements ASeekBar.ASeekBarListener{
-        @Override
-        public void SeekBarChange(int stall) {
-            mCameraProxy.setIsoChange(stall);
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        switch (checkedId) {
+            case R.id.rb_raw:
+                //
+                saveYUV = false;
+                saveRAW = true;
+                break;
+            case R.id.rb_yuv:
+                //
+                saveYUV = true;
+                saveRAW = false;
+                break;
         }
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -157,7 +196,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                     if (m.matches()) {
                         //输入的是汉字
                     }
-
                 } else {
                     mCameraProxy.setImageAvailableListener(mOnImageAvailableListener);
                     mCameraProxy.captureStillPicture(); // 拍照
@@ -165,7 +203,7 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                 break;
             case R.id.picture_iv:
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivity(intent);
+                startActivityForResult(intent,CHOSE_PHOTO);
                 break;
             case R.id.toolbar_flash_iv:
                 mCameraProxy.setFlash(flashState);//0:开启；1:关闭
@@ -174,6 +212,16 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                 } else {
                     flashState = 0;
                 }
+                break;
+            case R.id.btn_iso:
+                new XPopup.Builder(GLSurfaceCamera2Activity.this)
+                        .asCustom(new ListDrawerPopupView(GLSurfaceCamera2Activity.this, mCameraProxy))
+                        .show();
+                break;
+            case R.id.btn_expTime:
+                new XPopup.Builder(GLSurfaceCamera2Activity.this)
+                        .asCustom(new ExpListDrawerPopupView(GLSurfaceCamera2Activity.this, mCameraProxy))
+                        .show();
                 break;
         }
     }
@@ -269,7 +317,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             saveYUVData(images[0]);//存储YUV数据
-//            final Image image = reader.acquireLatestImage();
             final ByteBuffer yuvBytes = imageToByteBuffer(images[0]);
             // Convert YUV to RGB
             final RenderScript rs = RenderScript.create(getBaseContext());
@@ -308,7 +355,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
         FileOutputStream output = null;
         ByteBuffer buffer;
         byte[] bytes;
-        boolean success = false;
         switch (image.getFormat()) {
             case ImageFormat.YUV_420_888:
                 // "prebuffer" simply contains the meta information about the following planes.
@@ -317,7 +363,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                         .putInt(image.getHeight())
                         .putInt(image.getPlanes()[1].getPixelStride())
                         .putInt(image.getPlanes()[1].getRowStride());
-
                 try {
                     output = new FileOutputStream(file);
                     output.write(prebuffer.array()); // write meta information to file
@@ -328,8 +373,8 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                         buffer.get(bytes); // copies image from buffer to byte array
                         output.write(bytes);    // write the byte array to file
                     }
-                    Log.d(TAG, "saveYUV. filepath: " + file.getAbsolutePath());
-                    success = true;
+                    Log.d("YUV", "saveYUV. filepath: " + file.getAbsolutePath());
+                    Log.d("YUV", image.getWidth() + "   height:" + image.getHeight());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -345,8 +390,12 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
                     }
                 }
                 break;
+            case ImageFormat.RAW_SENSOR:
+                Toast.makeText(GLSurfaceCamera2Activity.this,"RAW_SENSOR",0).show();
+                break;
         }
     }
+
 
     private class ImageSaver implements Runnable {
         private final Image mImage;
@@ -363,7 +412,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             saveYUVData(mImage);//存储YUV数据
-//            final Image image = reader.acquireLatestImage();
             final ByteBuffer yuvBytes = imageToByteBuffer(mImage);
             // Convert YUV to RGB
             final RenderScript rs = RenderScript.create(getBaseContext());
@@ -379,7 +427,6 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             // Release
             long time = System.currentTimeMillis();
             if (mCameraProxy.isFrontCamera()) {
-//                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 Log.d(TAG, "BitmapFactory.decodeByteArray time: " + (System.currentTimeMillis() - time));
                 time = System.currentTimeMillis();
                 // 前置摄像头需要左右镜像

@@ -47,9 +47,11 @@
 
             <ImageView
                 android:id="@+id/toolbar_flash_iv"
-                android:layout_width="44dp"
-                android:layout_height="40dp"
-                android:src="@mipmap/ic_flash_off" />
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:layout_gravity="center_vertical"
+                android:src="@mipmap/flash" />
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
 
@@ -71,37 +73,80 @@
         android:layout_margin="20dp"
         android:scaleType="centerCrop" />
 
-    <com.tencent.xlab.infinixcamera2.view.ASeekBar
-        android:id="@+id/iso_seekBar"
-        android:layout_width="10800dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        app:default_stall="2"
-        app:seekbar_thump="@mipmap/zanting"
-        app:stall_count="5"
-        app:stall_name="iso设置"
-        app:text_color="@color/colorAccent" />
-
-    <com.tencent.xlab.infinixcamera2.view.ASeekBar
-        android:id="@+id/exp_seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/iso_seekBar"
-        app:default_stall="2"
-        app:seekbar_thump="@mipmap/zanting"
-        app:stall_count="5"
-        app:stall_name="曝光设置"
-        app:text_color="@color/colorAccent" />
-
-    <TextView
-        android:id="@+id/tv_iso"
+    <Button
+        android:id="@+id/btn_iso"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/exp_seekBar"
-        android:layout_marginTop="10dp"
-        android:textColor="@color/red" />
+        android:layout_below="@id/toolbar"
+        android:text="@string/setIso" />
 
-    <include layout="@layout/set_iso_layout" />
+    <Button
+        android:id="@+id/btn_expTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_iso"
+        android:text="@string/setExpTime" />
+    <LinearLayout
+        android:id="@+id/ll_iso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        <TextView
+            android:text="ISO: "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"/>
+        <TextView
+            android:id="@+id/tv_iso"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_iso"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        <TextView
+            android:text="曝光: "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"/>
+        <TextView
+            android:id="@+id/tv_exp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red" />
+    </LinearLayout>
+
+
+    <RadioGroup
+        android:id="@+id/rg_DataStyle"
+        android:layout_width="wrap_content"
+        android:layout_alignEnd="@id/toolbar"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_margin="10dp">
+
+        <RadioButton
+            android:id="@+id/rb_raw"
+            android:text="@string/saveRAW"
+            android:checked="true"
+            android:textColor="@color/yellow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/rb_yuv"
+            android:text="@string/saveYUV"
+            android:textColor="@color/yellow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
 
     <EditText
         android:id="@+id/et_count"
