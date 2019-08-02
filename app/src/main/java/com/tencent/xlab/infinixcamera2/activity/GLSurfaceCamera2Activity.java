@@ -1,11 +1,11 @@
-package com.tencent.xlab.infinixcamera2;
+package com.tencent.xlab.infinixcamera2.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.DngCreator;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.AsyncTask;
@@ -26,15 +26,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.lxj.xpopup.XPopup;
+import com.tencent.xlab.infinixcamera2.R;
 import com.tencent.xlab.infinixcamera2.camera.Camera2Proxy;
 import com.tencent.xlab.infinixcamera2.utils.ImageUtil;
 import com.tencent.xlab.infinixcamera2.utils.ImageUtils;
+import com.tencent.xlab.infinixcamera2.utils.SystemUtil;
 import com.tencent.xlab.infinixcamera2.view.Camera2GLSurfaceView;
 import com.tencent.xlab.infinixcamera2.view.ExpListDrawerPopupView;
 import com.tencent.xlab.infinixcamera2.view.ListDrawerPopupView;
@@ -330,7 +331,9 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             allocationRgb.copyTo(bitmap);
 
             // Release
-            ImageUtils.saveBitmap(bitmap);
+            if(ImageUtils.saveBitmap(bitmap)){
+                saveExif(ImageUtils.outFile);
+            }
             images[0].close();
             bitmap.recycle();
 
@@ -345,6 +348,26 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             mPictureIv.setImageBitmap(bitmap);
         }
 
+    }
+
+    private void saveExif(File outFile) {
+        try {
+            ExifInterface exifInterface = new ExifInterface(outFile.getAbsolutePath());
+            exifInterface.setAttribute(ExifInterface.TAG_ISO,String.valueOf(mCameraProxy.getIso()));
+            double expTime = mCameraProxy.getmExpTime();
+            Log.e(TAG,String.valueOf(expTime));
+            exifInterface.setAttribute(ExifInterface.TAG_EXPOSURE_TIME,String.valueOf(expTime));
+            if (flashState == 0){
+                exifInterface.setAttribute(ExifInterface.TAG_FLASH,"1");
+            }else {
+                exifInterface.setAttribute(ExifInterface.TAG_FLASH,"0");
+            }
+            exifInterface.setAttribute(ExifInterface.TAG_MAKE,SystemUtil.getDeviceBrand());
+            exifInterface.setAttribute(ExifInterface.TAG_MODEL,SystemUtil.getSystemModel());
+            exifInterface.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -425,23 +448,8 @@ public class GLSurfaceCamera2Activity extends AppCompatActivity implements View.
             allocationRgb.copyTo(bitmap);
 
             // Release
-            long time = System.currentTimeMillis();
-            if (mCameraProxy.isFrontCamera()) {
-                Log.d(TAG, "BitmapFactory.decodeByteArray time: " + (System.currentTimeMillis() - time));
-                time = System.currentTimeMillis();
-                // 前置摄像头需要左右镜像
-                Bitmap rotateBitmap = ImageUtils.rotateBitmap(bitmap, 270, true, true);
-                Log.d(TAG, "rotateBitmap time: " + (System.currentTimeMillis() - time));
-                time = System.currentTimeMillis();
-                ImageUtils.saveBitmap(rotateBitmap);
-                Log.d(TAG, "saveBitmap time: " + (System.currentTimeMillis() - time));
-                rotateBitmap.recycle();
-            } else {
-//                ImageUtils.saveImage(bytes);
-                Bitmap rotateBitmap = ImageUtils.rotateBitmap(bitmap, 90, true, true);
-                ImageUtils.saveBitmap(rotateBitmap);
-                Log.d(TAG, "saveBitmap time: " + (System.currentTimeMillis() - time));
-                rotateBitmap.recycle();
+            if(ImageUtils.saveBitmap(bitmap)){
+                saveExif(ImageUtils.outFile);
             }
             mImage.close();
             bitmap.recycle();

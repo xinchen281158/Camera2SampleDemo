@@ -14,6 +14,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.tencent.xlab.infinixcamera2.activity.Camera2RawActivity;
+import com.tencent.xlab.infinixcamera2.activity.GLSurfaceCamera2Activity;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -28,12 +31,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        findViewById(R.id.btn_camera2raw).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, Camera2RawActivity.class));
+            }
+        });
     }
 
 
     private void checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+            String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,Manifest.permission.READ_PHONE_STATE};
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, permissions, 200);

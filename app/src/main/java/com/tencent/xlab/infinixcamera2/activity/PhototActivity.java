@@ -1,4 +1,4 @@
-package com.tencent.xlab.infinixcamera2;
+package com.tencent.xlab.infinixcamera2.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
+
+import com.tencent.xlab.infinixcamera2.R;
 
 public class PhototActivity extends AppCompatActivity {
 

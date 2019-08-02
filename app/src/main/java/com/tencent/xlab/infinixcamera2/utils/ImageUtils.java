@@ -22,6 +22,7 @@ public class ImageUtils {
 
     private static final String TAG = "ImageUtils";
     private static Context sContext = MyApp.getInstance();
+    public static File outFile;
 
     public static final String GALLERY_PATH = Environment.getExternalStoragePublicDirectory(Environment
             .DIRECTORY_DCIM) + File.separator + "Camera";
@@ -98,14 +99,16 @@ public class ImageUtils {
         }
     }
 
-    public static void saveBitmap(Bitmap bitmap) {
+    public static boolean saveBitmap(Bitmap bitmap) {
+        boolean success =false;
         String fileName = DATE_FORMAT.format(new Date(System.currentTimeMillis())) + ".jpg";
-        File outFile = new File(GALLERY_PATH, fileName);
+//        File outFile = new File(GALLERY_PATH, fileName);
+        outFile = new File(GALLERY_PATH, fileName);
         Log.d(TAG, "saveImage. filepath: " + outFile.getAbsolutePath());
         FileOutputStream os = null;
         try {
             os = new FileOutputStream(outFile);
-            boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            success = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
             Log.d(TAG, "saveBitmap: " + success);
             if (success) {
                 insertToDB(outFile.getAbsolutePath());
@@ -121,7 +124,9 @@ public class ImageUtils {
                 }
             }
         }
+        return success;
     }
+
 
     public static void insertToDB(String picturePath) {
         ContentValues values = new ContentValues();
@@ -149,4 +154,5 @@ public class ImageUtils {
         cursor.close();
         return bitmap;
     }
+
 }

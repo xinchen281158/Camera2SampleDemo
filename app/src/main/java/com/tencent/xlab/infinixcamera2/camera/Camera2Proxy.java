@@ -31,7 +31,7 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.tencent.xlab.infinixcamera2.GLSurfaceCamera2Activity;
+import com.tencent.xlab.infinixcamera2.activity.GLSurfaceCamera2Activity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class Camera2Proxy {
     private Activity mActivity;
 
     private int mCameraId = CameraCharacteristics.LENS_FACING_FRONT; // 要打开的摄像头ID
-//    private int mCameraId = CameraCharacteristics.LENS_FACING_EXTERNAL; // 要打开的摄像头ID
+    //    private int mCameraId = CameraCharacteristics.LENS_FACING_EXTERNAL; // 要打开的摄像头ID
     private Size mPreviewSize; // 预览大小
     private CameraManager mCameraManager; // 相机管理者
     private CameraCharacteristics mCameraCharacteristics; // 相机属性
@@ -58,6 +58,7 @@ public class Camera2Proxy {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     private ImageReader mImageReader;
+    private ImageReader mImageReaderRaw;
     private Surface mPreviewSurface;
     private SurfaceTexture mPreviewSurfaceTexture;
     private OrientationEventListener mOrientationEventListener;
@@ -133,6 +134,7 @@ public class Camera2Proxy {
 //            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.JPEG, 2);
 //            mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 4);
             mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, 2);
+            mImageReaderRaw = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.RAW_SENSOR, 2);
             // 预览大小，根据上面选择的拍照图片的长宽比，选择一个和控件长宽差不多的大小
 //            mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height, largest);
             mPreviewSize = map.getOutputSizes(SurfaceTexture.class)[0];
@@ -159,6 +161,10 @@ public class Camera2Proxy {
             mImageReader.close();
             mImageReader = null;
         }
+        if (mImageReaderRaw != null) {
+            mImageReaderRaw.close();
+            mImageReaderRaw = null;
+        }
         mOrientationEventListener.disable();
         stopBackgroundThread(); // 对应 openCamera() 方法中的 startBackgroundThread()
     }
@@ -168,7 +174,6 @@ public class Camera2Proxy {
             Log.w(TAG, "setImageAvailableListener: mImageReader is null");
             return;
         }
-
         mImageReader.setOnImageAvailableListener(onImageAvailableListener, null);
 
     }
@@ -188,30 +193,31 @@ public class Camera2Proxy {
                 mPreviewSurfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 mPreviewSurface = new Surface(mPreviewSurfaceTexture);
             }
-            mPreviewRequestBuilder.addTarget(mPreviewSurface); // 设置预览输出的 Surface
-            mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface, mImageReader.getSurface()),
-                        new CameraCaptureSession.StateCallback() {
 
-                            @Override
-                            public void onConfigured(@NonNull CameraCaptureSession session) {
-                                mCaptureSession = session;
-                                // 设置连续自动对焦
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest
-                                        .CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                // 设置自动曝光
+            mPreviewRequestBuilder.addTarget(mPreviewSurface); // 设置预览输出的 Surface
+            mCameraDevice.createCaptureSession(Arrays.asList(mPreviewSurface,
+                    mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession session) {
+                    mCaptureSession = session;
+                    // 设置连续自动对焦
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest
+                            .CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                    // 设置自动曝光
 //                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest
 //                                    .CONTROL_AE_MODE_ON_AUTO_FLASH);
 
-                                // 设置完后自动开始预览
-                                mPreviewRequest = mPreviewRequestBuilder.build();
-                                startPreview();
-                            }
+                    // 设置完后自动开始预览
+                    mPreviewRequest = mPreviewRequestBuilder.build();
+                    startPreview();
+                }
 
-                            @Override
-                            public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-                                Log.e(TAG, "ConfigureFailed. session: mCaptureSession");
-                            }
-                        }, mBackgroundHandler);
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                    Log.e(TAG, "ConfigureFailed. session: mCaptureSession");
+                }
+            }, mBackgroundHandler);
 
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -421,7 +427,7 @@ public class Camera2Proxy {
                 @Override
                 public void run() {
                     GLSurfaceCamera2Activity.tv_iso.setText(String.valueOf(mIso));
-                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf (mExpTime/1000));
+                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf(mExpTime / 1000));
                 }
             });
         } else {
@@ -436,13 +442,13 @@ public class Camera2Proxy {
 
     public void setExpChange(long expTime) {
         if (expTimeRange != null) {
-            long max3 = expTimeRange.getUpper() ;
+            long max3 = expTimeRange.getUpper();
             long min3 = expTimeRange.getLower();
-            if (expTime > max3){
+            if (expTime > max3) {
                 mExpTime = max3;
-            }else if (expTime < min3){
+            } else if (expTime < min3) {
                 mExpTime = min3;
-            }else {
+            } else {
                 mExpTime = expTime;
             }
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
@@ -457,7 +463,7 @@ public class Camera2Proxy {
                 public void run() {
 //                    GLSurfaceCamera2Activity.tv_iso.setText("iso:" + mIso + "\n曝光：" + mExpTime/1000 + "us");
                     GLSurfaceCamera2Activity.tv_iso.setText(String.valueOf(mIso));
-                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf (mExpTime/1000));
+                    GLSurfaceCamera2Activity.tv_exp.setText(String.valueOf(mExpTime / 1000));
                 }
             });
         } else {
@@ -689,6 +695,14 @@ public class Camera2Proxy {
         if (x > max) return max;
         if (x < min) return min;
         return x;
+    }
+
+    public int getIso() {
+        return mIso;
+    }
+
+    public double getmExpTime() {
+        return (double) mExpTime / 1000000;
     }
 
 
